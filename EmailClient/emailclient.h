@@ -2,6 +2,8 @@
 #define EMAILCLIENT_H
 
 #include "login.h"
+#include "ui_login.h"
+#include "../src/SmtpMime"
 
 #include <QMainWindow>
 #include <QGraphicsBlurEffect>
@@ -22,6 +24,7 @@ public:
 
 private:
     void setupLoginDialog();
+    void setsBlurToMainWindow();
 
 private:
     Ui::EmailClient *ui;

@@ -15,6 +15,9 @@ public:
     explicit Login(QWidget *parent = nullptr);
     ~Login();
 
+private slots:
+    void onClickExit();
+
 private:
     Ui::Login *ui;
 };
