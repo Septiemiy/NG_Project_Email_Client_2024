@@ -11,8 +11,10 @@ Login::Login(QWidget *parent)
     ui->t_app_password_link->setStyleSheet("background: transparent; border: 0px;");
 
     ui->e_message->setReadOnly(true);
-    ui->e_message->setStyleSheet("background: transparent; border: 0px;");
-    ui->e_message->hide();
+    ui->e_message->setAlignment(Qt::AlignHCenter);
+    ui->e_message->setStyleSheet("color: red; background: transparent; border: 0px;");
+
+    ui->e_login_app_password->setEchoMode(QLineEdit::Password);
 
     connect(ui->b_login_quit, &QPushButton::clicked, this, &Login::onClickExit);
 }

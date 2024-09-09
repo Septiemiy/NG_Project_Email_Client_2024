@@ -7,6 +7,8 @@
 
 #include <QMainWindow>
 #include <QGraphicsBlurEffect>
+#include <QDebug>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -22,14 +24,20 @@ public:
     EmailClient(QWidget *parent = nullptr);
     ~EmailClient();
 
+private slots:
+    void checkUserLoginData();
+
 private:
     void setupLoginDialog();
     void setsBlurToMainWindow();
+    void connectToSmtp();
+    void switchToEmailClientWindow();
 
 private:
     Ui::EmailClient *ui;
 
     QGraphicsBlurEffect *m_blurEffect;
     Login *m_loginWidget;
+    SmtpClient *m_smtp;
 };
 #endif // EMAILCLIENT_H

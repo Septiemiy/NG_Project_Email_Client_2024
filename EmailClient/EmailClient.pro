@@ -21,6 +21,16 @@ FORMS += \
     emailclient.ui \
     login.ui
 
+LIBS += -lSmtpMime2
+
+unix|win32: LIBS += -L$$PWD/../build-SMTPEmail-Desktop_Qt_6_6_2_MinGW_64_bit-Release/release -lSmtpMime2
+
+INCLUDEPATH += $$PWD/../build-SMTPEmail-Desktop_Qt_6_6_2_MinGW_64_bit-Release
+DEPENDPATH += $$PWD/../build-SMTPEmail-Desktop_Qt_6_6_2_MinGW_64_bit-Release
+
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../build-SMTPEmail-Desktop_Qt_6_6_2_MinGW_64_bit-Release/release/SmtpMime2.dll
+else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../build-SMTPEmail-Desktop_Qt_6_6_2_MinGW_64_bit-Release/release/libSmtpMime2.a
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

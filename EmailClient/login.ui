@@ -29,8 +29,8 @@
   <widget class="QTextEdit" name="t_app_password_link">
    <property name="geometry">
     <rect>
-     <x>13</x>
-     <y>130</y>
+     <x>14</x>
+     <y>140</y>
      <width>377</width>
      <height>71</height>
     </rect>
@@ -50,8 +50,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>11</x>
-     <y>11</y>
+     <x>13</x>
+     <y>13</y>
      <width>381</width>
      <height>136</height>
     </rect>

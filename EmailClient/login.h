@@ -18,7 +18,7 @@ public:
 private slots:
     void onClickExit();
 
-private:
+public:
     Ui::Login *ui;
 };
 
