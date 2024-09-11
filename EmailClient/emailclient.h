@@ -32,6 +32,15 @@ private:
     void setsBlurToMainWindow();
     void connectToSmtp();
     void switchToEmailClientWindow();
+    void createUserStruct();
+
+private:
+
+    struct User
+    {
+        QString email;
+        QString appPassword;
+    };
 
 private:
     Ui::EmailClient *ui;

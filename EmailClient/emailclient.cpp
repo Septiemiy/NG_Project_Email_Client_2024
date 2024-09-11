@@ -40,6 +40,7 @@ void EmailClient::checkUserLoginData()
         qDebug() << "User connected";
         m_loginWidget->ui->e_message->setText("Successful connection");
         m_loginWidget->ui->e_message->setStyleSheet("color: green; background: transparent; border: 0px;");
+        createUserStruct();
         QTimer::singleShot(1500, this, &EmailClient::switchToEmailClientWindow);
     }
 }
@@ -78,4 +79,11 @@ void EmailClient::switchToEmailClientWindow()
     m_loginWidget->hide();
     ui->centralwidget->setEnabled(true);
     m_blurEffect->setEnabled(false);
+}
+
+void EmailClient::createUserStruct()
+{
+    User user;
+    user.email = m_loginWidget->ui->e_login_email->text();
+    user.appPassword = m_loginWidget->ui->e_login_app_password->text();
 }
