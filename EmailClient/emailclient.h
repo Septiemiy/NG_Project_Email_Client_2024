@@ -3,6 +3,8 @@
 
 #include "login.h"
 #include "ui_login.h"
+#include "sendtouser.h"
+#include "ui_sendtouser.h"
 #include "../src/SmtpMime"
 
 #include <QMainWindow>
@@ -33,11 +35,13 @@ private:
     void connectToSmtp();
     void switchToEmailClientWindow();
     void createUserStruct();
+    void onSendUserClick();
 
 private:
 
     struct User
     {
+        QString name;
         QString email;
         QString appPassword;
     };
@@ -48,5 +52,6 @@ private:
     QGraphicsBlurEffect *m_blurEffect;
     Login *m_loginWidget;
     SmtpClient *m_smtp;
+    SendToUser *m_sendToUser;
 };
 #endif // EMAILCLIENT_H

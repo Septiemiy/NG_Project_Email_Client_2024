@@ -11,6 +11,7 @@ EmailClient::EmailClient(QWidget *parent)
 
     m_blurEffect = new QGraphicsBlurEffect();
     m_loginWidget = new Login(this);
+    m_sendToUser = new SendToUser();
 
     ui->centralwidget->setDisabled(true);
 
@@ -19,6 +20,7 @@ EmailClient::EmailClient(QWidget *parent)
     setupLoginDialog();
 
     connect(m_loginWidget->ui->b_login, &QPushButton::clicked, this, &EmailClient::checkUserLoginData);
+    connect(ui->b_sendUser, &QPushButton::clicked, this, &EmailClient::onSendUserClick);
 }
 
 EmailClient::~EmailClient()
@@ -29,6 +31,12 @@ EmailClient::~EmailClient()
 
 void EmailClient::checkUserLoginData()
 {
+    if(m_loginWidget->ui->e_login_name->text().simplified().size() == 0)
+    {
+        m_loginWidget->ui->e_message->setText("Name can`t be empty");
+        return;
+    }
+
     m_smtp->login(m_loginWidget->ui->e_login_email->text(), m_loginWidget->ui->e_login_app_password->text());
     if(!m_smtp->waitForAuthenticated(3000))
     {
@@ -84,6 +92,12 @@ void EmailClient::switchToEmailClientWindow()
 void EmailClient::createUserStruct()
 {
     User user;
+    user.name = m_loginWidget->ui->e_login_name->text();
     user.email = m_loginWidget->ui->e_login_email->text();
     user.appPassword = m_loginWidget->ui->e_login_app_password->text();
+}
+
+void EmailClient::onSendUserClick()
+{
+    m_sendToUser->show();
 }

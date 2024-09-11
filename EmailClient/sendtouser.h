@@ -15,7 +15,10 @@ public:
     explicit SendToUser(QWidget *parent = nullptr);
     ~SendToUser();
 
-private:
+private slots:
+    void onClickCancel();
+
+public:
     Ui::SendToUser *ui;
 };
 
