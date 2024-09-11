@@ -11,15 +11,18 @@ CONFIG += c++17
 SOURCES += \
     login.cpp \
     main.cpp \
-    emailclient.cpp
+    emailclient.cpp \
+    sendtouser.cpp
 
 HEADERS += \
     emailclient.h \
-    login.h
+    login.h \
+    sendtouser.h
 
 FORMS += \
     emailclient.ui \
-    login.ui
+    login.ui \
+    sendtouser.ui
 
 LIBS += -lSmtpMime2
 

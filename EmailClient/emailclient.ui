@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
+    <width>855</width>
     <height>585</height>
    </rect>
   </property>
@@ -51,19 +51,6 @@
     </property>
     <property name="text">
      <string/>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="b_sendEmail">
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>510</y>
-      <width>111</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Send email</string>
     </property>
    </widget>
    <widget class="QPushButton" name="b_logout">
@@ -145,13 +132,52 @@
      </rect>
     </property>
    </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>420</y>
+      <width>120</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Send email</string>
+    </property>
+    <widget class="QPushButton" name="b_sendUsers">
+     <property name="geometry">
+      <rect>
+       <x>3</x>
+       <y>30</y>
+       <width>111</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Send users</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="b_sendUser">
+     <property name="geometry">
+      <rect>
+       <x>3</x>
+       <y>80</y>
+       <width>111</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Send user</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>850</width>
+     <width>855</width>
      <height>26</height>
     </rect>
    </property>
