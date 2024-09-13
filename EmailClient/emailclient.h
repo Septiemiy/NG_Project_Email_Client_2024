@@ -11,6 +11,7 @@
 #include <QGraphicsBlurEffect>
 #include <QDebug>
 #include <QTimer>
+#include <QDateTime>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -45,6 +46,7 @@ private:
     void onSendEmailClick();
     void sendEmailToUser();
     QStringList stringToRecipient(QString user);
+    void addToRecent(QStringList &users);
 
 private:
     Ui::EmailClient *ui;
@@ -59,6 +61,12 @@ private:
     {
         Email,
         Name
+    };
+
+    enum Contacts
+    {
+        Recent,
+        Contact
     };
 };
 #endif // EMAILCLIENT_H

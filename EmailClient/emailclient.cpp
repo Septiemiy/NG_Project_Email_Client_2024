@@ -13,6 +13,9 @@ EmailClient::EmailClient(QWidget *parent)
     m_loginWidget = new Login(this);
     m_sendToUser = new SendToUser();
 
+    ui->tw_contacts->setTabText(Contacts::Recent, "Recent");
+    ui->tw_contacts->setTabText(Contacts::Contact, "Contacts");
+
     ui->centralwidget->setDisabled(true);
 
     setsBlurToMainWindow();
@@ -86,6 +89,8 @@ void EmailClient::connectToSmtp()
 void EmailClient::switchToEmailClientWindow()
 {
     m_loginWidget->hide();
+    m_loginWidget->ui->e_login_message->clear();
+    m_loginWidget->ui->e_login_message->setStyleSheet("color: red; background: transparent; border: 0px;");
     ui->centralwidget->setEnabled(true);
     m_blurEffect->setEnabled(false);
 }
@@ -109,8 +114,8 @@ void EmailClient::sendEmailToUser()
     EmailAddress sender(m_user.email, m_user.name);
     message.setSender(sender);
 
-    QStringListModel *userModel = (QStringListModel*)m_sendToUser->ui->lv_send_email_to_users->model();
-    QStringList users = userModel->stringList();
+    QStringListModel *usersModel = (QStringListModel*)m_sendToUser->ui->lv_send_email_to_users->model();
+    QStringList users = usersModel->stringList();
 
     for(int index = 0; index < users.size(); index++)
     {
@@ -127,6 +132,17 @@ void EmailClient::sendEmailToUser()
 
     message.addPart(&text);
 
+    QStringListModel *filesModel = (QStringListModel*)m_sendToUser->ui->lv_send_user_files->model();
+    QStringList files = filesModel->stringList();
+
+
+    for(int index = 0; index < files.size(); index++)
+    {
+        QFile *file = new QFile(files[index]);
+        MimeAttachment *attachment = new MimeAttachment(file);
+        message.addPart(attachment, true);
+    }
+
     m_smtp->sendMail(message);
     if(!m_smtp->waitForMailSent(3000))
     {
@@ -138,10 +154,20 @@ void EmailClient::sendEmailToUser()
         qDebug() << "Email send";
         m_sendToUser->ui->e_send_user_message->setText("Send email success");
         m_sendToUser->ui->e_send_user_message->setStyleSheet("color: green; background: transparent; border: 0px;");
+        addToRecent(users);
     }
 }
 
 QStringList EmailClient::stringToRecipient(QString user)
 {
     return user.split(";");
+}
+
+void EmailClient::addToRecent(QStringList &users)
+{
+    for(int index = 0; index < users.size(); index++)
+    {
+        QStringList userData = stringToRecipient(users.at(index));
+        ui->lw_recent->addItem(userData.at(UserData::Email) + "\n" + QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy"));
+    }
 }

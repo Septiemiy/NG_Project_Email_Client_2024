@@ -35,6 +35,7 @@ public:
 private:
     QStringListModel *m_modelFiles;
     QStringListModel *m_modelUsers;
+    QStringList m_filePath;
     QStringList m_users;
 
 };

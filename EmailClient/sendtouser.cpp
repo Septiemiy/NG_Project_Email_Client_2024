@@ -13,6 +13,11 @@ SendToUser::SendToUser(QWidget *parent)
     m_modelFiles = new QStringListModel(this);
     m_modelUsers = new QStringListModel(this);
 
+    m_modelFiles->setStringList(m_filePath);
+    m_modelUsers->setStringList(m_users);
+    ui->lv_send_user_files->setModel(m_modelFiles);
+    ui->lv_send_email_to_users->setModel(m_modelUsers);
+
     ui->e_send_user_message->setReadOnly(true);
     ui->e_send_user_message->setAlignment(Qt::AlignHCenter);
     ui->e_send_user_message->setStyleSheet("color: red; background: transparent; border: 0px;");
@@ -45,8 +50,8 @@ void SendToUser::onClickCancel()
 
 void SendToUser::addFilePathToAttachmentList()
 {
-    QStringList filePath = QFileDialog::getOpenFileNames(this, "Open files", "/");
-    m_modelFiles->setStringList(filePath);
+    m_filePath.append(QFileDialog::getOpenFileNames(this, "Open files", "/"));
+    m_modelFiles->setStringList(m_filePath);
     ui->lv_send_user_files->setModel(m_modelFiles);
 }
 
@@ -81,12 +86,14 @@ void SendToUser::showContextMenuFiles(const QPoint &pos)
         if(index.isValid())
         {
             m_modelFiles->removeRow(index.row());
+            m_filePath.removeAt(index.row());
         }
     });
 
     QAction *deleteRows = new QAction("Delete all", this);
     connect(deleteRows, &QAction::triggered, this, [=](){
         m_modelFiles->removeRows(0, m_modelFiles->rowCount());
+        m_filePath.clear();
     });
 
     contextMenu.addAction(deleteRow);
@@ -104,12 +111,14 @@ void SendToUser::showContextMenuUsers(const QPoint &pos)
         if(index.isValid())
         {
             m_modelUsers->removeRow(index.row());
+            m_users.removeAt(index.row());
         }
     });
 
     QAction *deleteRows = new QAction("Delete all", this);
     connect(deleteRows, &QAction::triggered, this, [=](){
         m_modelUsers->removeRows(0, m_modelUsers->rowCount());
+        m_users.clear();
     });
 
     contextMenu.addAction(deleteRow);
@@ -125,6 +134,9 @@ void SendToUser::closeEvent(QCloseEvent *event)
     ui->te_send_user_text->clear();
     m_modelFiles->removeRows(0, m_modelFiles->rowCount());
     m_modelUsers->removeRows(0, m_modelUsers->rowCount());
+    m_filePath.clear();
     m_users.clear();
+    ui->e_send_user_message->clear();
+    ui->e_send_user_message->setStyleSheet("color: red; background: transparent; border: 0px;");
     event->accept();
 }
