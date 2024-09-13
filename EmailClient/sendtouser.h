@@ -2,6 +2,10 @@
 #define SENDTOUSER_H
 
 #include <QFrame>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QStringListModel>
+#include <QMenu>
 
 namespace Ui {
 class SendToUser;
@@ -17,9 +21,22 @@ public:
 
 private slots:
     void onClickCancel();
+    void addFilePathToAttachmentList();
+    void addUsersToUsersList();
+    void showContextMenuFiles(const QPoint &pos);
+    void showContextMenuUsers(const QPoint &pos);
+
+private:
+    void closeEvent(QCloseEvent *event);
 
 public:
     Ui::SendToUser *ui;
+
+private:
+    QStringListModel *m_modelFiles;
+    QStringListModel *m_modelUsers;
+    QStringList m_users;
+
 };
 
 #endif // SENDTOUSER_H

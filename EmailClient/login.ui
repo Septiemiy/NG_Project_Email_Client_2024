@@ -58,7 +58,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QLineEdit" name="e_message"/>
+     <widget class="QLineEdit" name="e_login_message"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">

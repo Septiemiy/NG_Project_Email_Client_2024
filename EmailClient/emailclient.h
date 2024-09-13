@@ -18,6 +18,13 @@ class EmailClient;
 }
 QT_END_NAMESPACE
 
+struct User
+{
+    QString name;
+    QString email;
+    QString appPassword;
+};
+
 class EmailClient : public QMainWindow
 {
     Q_OBJECT
@@ -35,16 +42,8 @@ private:
     void connectToSmtp();
     void switchToEmailClientWindow();
     void createUserStruct();
-    void onSendUserClick();
-
-private:
-
-    struct User
-    {
-        QString name;
-        QString email;
-        QString appPassword;
-    };
+    void onSendEmailClick();
+    void sendEmailToUser();
 
 private:
     Ui::EmailClient *ui;
@@ -53,5 +52,6 @@ private:
     Login *m_loginWidget;
     SmtpClient *m_smtp;
     SendToUser *m_sendToUser;
+    User m_user;
 };
 #endif // EMAILCLIENT_H

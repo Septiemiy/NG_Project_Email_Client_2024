@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>447</width>
-    <height>624</height>
+    <width>866</width>
+    <height>489</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,19 +17,19 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>10</y>
+     <y>40</y>
      <width>411</width>
-     <height>131</height>
+     <height>141</height>
     </rect>
    </property>
    <property name="title">
     <string>To:</string>
    </property>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>40</y>
+      <y>30</y>
       <width>381</width>
       <height>63</height>
      </rect>
@@ -65,17 +65,137 @@
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="b_add_recipient">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>100</y>
+      <width>111</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add recipient</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLineEdit" name="e_send_user_message">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>10</y>
+     <width>411</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>10</y>
+     <width>401</width>
+     <height>211</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_6">
+    <item>
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Several recipient:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QListView" name="lv_send_email_to_users"/>
+    </item>
+   </layout>
   </widget>
   <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>150</y>
-     <width>411</width>
-     <height>461</height>
+     <y>440</y>
+     <width>831</width>
+     <height>42</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_6">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QPushButton" name="b_send_user_cancel">
+        <property name="text">
+         <string>Cancel</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>138</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_send_user_add_file">
+        <property name="text">
+         <string>Add file</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_send_user_send_email">
+        <property name="text">
+         <string>Send</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>230</y>
+     <width>401</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_7">
+    <item>
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Files to send:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QListView" name="lv_send_user_files"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>21</x>
+     <y>191</y>
+     <width>411</width>
+     <height>231</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_8">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
@@ -91,65 +211,33 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QTextEdit" name="te_send_user_text"/>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Files to send:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QListView" name="lv_send_user_files_list"/>
-          </item>
-         </layout>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Text: </string>
+          </property>
+         </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QPushButton" name="b_send_user_cancel">
-            <property name="text">
-             <string>Cancel</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>138</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="b_send_user_add_file">
-            <property name="text">
-             <string>Add file</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="b_send_user_send_email">
-            <property name="text">
-             <string>Send</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>158</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="te_send_user_text"/>
       </item>
      </layout>
     </item>

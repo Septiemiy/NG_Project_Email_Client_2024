@@ -20,7 +20,8 @@ EmailClient::EmailClient(QWidget *parent)
     setupLoginDialog();
 
     connect(m_loginWidget->ui->b_login, &QPushButton::clicked, this, &EmailClient::checkUserLoginData);
-    connect(ui->b_sendUser, &QPushButton::clicked, this, &EmailClient::onSendUserClick);
+    connect(ui->b_sendEmail, &QPushButton::clicked, this, &EmailClient::onSendEmailClick);
+    connect(m_sendToUser->ui->b_send_user_send_email, &QPushButton::clicked, this, &EmailClient::sendEmailToUser);
 }
 
 EmailClient::~EmailClient()
@@ -33,21 +34,21 @@ void EmailClient::checkUserLoginData()
 {
     if(m_loginWidget->ui->e_login_name->text().simplified().size() == 0)
     {
-        m_loginWidget->ui->e_message->setText("Name can`t be empty");
+        m_loginWidget->ui->e_login_message->setText("Name can`t be empty");
         return;
     }
 
     m_smtp->login(m_loginWidget->ui->e_login_email->text(), m_loginWidget->ui->e_login_app_password->text());
     if(!m_smtp->waitForAuthenticated(3000))
     {
-        qDebug() << "Login failed: Invalid email or app password";
-        m_loginWidget->ui->e_message->setText("Invalid email or app password");
+        qDebug() << "Login failed";
+        m_loginWidget->ui->e_login_message->setText("Invalid email or app password");
     }
     else
     {
         qDebug() << "User connected";
-        m_loginWidget->ui->e_message->setText("Successful connection");
-        m_loginWidget->ui->e_message->setStyleSheet("color: green; background: transparent; border: 0px;");
+        m_loginWidget->ui->e_login_message->setText("Successful connection");
+        m_loginWidget->ui->e_login_message->setStyleSheet("color: green; background: transparent; border: 0px;");
         createUserStruct();
         QTimer::singleShot(1500, this, &EmailClient::switchToEmailClientWindow);
     }
@@ -74,7 +75,7 @@ void EmailClient::connectToSmtp()
     if(!m_smtp->waitForReadyConnected(5000))
     {
         qDebug() << "Failed to connect to smtp server";
-        m_loginWidget->ui->e_message->setText("Failed to connect to smtp server");
+        m_loginWidget->ui->e_login_message->setText("Failed to connect to smtp server");
     }
     else
     {
@@ -91,13 +92,44 @@ void EmailClient::switchToEmailClientWindow()
 
 void EmailClient::createUserStruct()
 {
-    User user;
-    user.name = m_loginWidget->ui->e_login_name->text();
-    user.email = m_loginWidget->ui->e_login_email->text();
-    user.appPassword = m_loginWidget->ui->e_login_app_password->text();
+    m_user.name = m_loginWidget->ui->e_login_name->text();
+    m_user.email = m_loginWidget->ui->e_login_email->text();
+    m_user.appPassword = m_loginWidget->ui->e_login_app_password->text();
 }
 
-void EmailClient::onSendUserClick()
+void EmailClient::onSendEmailClick()
 {
     m_sendToUser->show();
+}
+
+void EmailClient::sendEmailToUser()
+{
+    MimeMessage message;
+
+    EmailAddress sender(m_user.email, m_user.name);
+    message.setSender(sender);
+
+    EmailAddress recipient(m_sendToUser->ui->e_send_user_email->text(), m_sendToUser->ui->e_send_user_name->text());
+    message.addRecipient(recipient);
+
+    message.setSubject(m_sendToUser->ui->e_send_user_subject->text());
+
+    MimeText text;
+
+    text.setText(m_sendToUser->ui->te_send_user_text->toPlainText());
+
+    message.addPart(&text);
+
+    m_smtp->sendMail(message);
+    if(!m_smtp->waitForMailSent(3000))
+    {
+        qDebug() << "Send email failed";
+        m_sendToUser->ui->e_send_user_message->setText("Send email failed");
+    }
+    else
+    {
+        qDebug() << "Email send";
+        m_sendToUser->ui->e_send_user_message->setText("Send email success");
+        m_sendToUser->ui->e_send_user_message->setStyleSheet("color: green; background: transparent; border: 0px;");
+    }
 }
