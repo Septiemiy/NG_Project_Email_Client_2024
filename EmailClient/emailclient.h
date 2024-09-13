@@ -44,6 +44,7 @@ private:
     void createUserStruct();
     void onSendEmailClick();
     void sendEmailToUser();
+    QStringList stringToRecipient(QString user);
 
 private:
     Ui::EmailClient *ui;
@@ -53,5 +54,11 @@ private:
     SmtpClient *m_smtp;
     SendToUser *m_sendToUser;
     User m_user;
+
+    enum UserData
+    {
+        Email,
+        Name
+    };
 };
 #endif // EMAILCLIENT_H

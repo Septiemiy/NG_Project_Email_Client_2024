@@ -109,8 +109,15 @@ void EmailClient::sendEmailToUser()
     EmailAddress sender(m_user.email, m_user.name);
     message.setSender(sender);
 
-    EmailAddress recipient(m_sendToUser->ui->e_send_user_email->text(), m_sendToUser->ui->e_send_user_name->text());
-    message.addRecipient(recipient);
+    QStringListModel *userModel = (QStringListModel*)m_sendToUser->ui->lv_send_email_to_users->model();
+    QStringList users = userModel->stringList();
+
+    for(int index = 0; index < users.size(); index++)
+    {
+        QStringList userData = stringToRecipient(users.at(index));
+        EmailAddress recipient(userData.at(UserData::Email), userData.at(UserData::Name));
+        message.addRecipient(recipient);
+    }
 
     message.setSubject(m_sendToUser->ui->e_send_user_subject->text());
 
@@ -132,4 +139,9 @@ void EmailClient::sendEmailToUser()
         m_sendToUser->ui->e_send_user_message->setText("Send email success");
         m_sendToUser->ui->e_send_user_message->setStyleSheet("color: green; background: transparent; border: 0px;");
     }
+}
+
+QStringList EmailClient::stringToRecipient(QString user)
+{
+    return user.split(";");
 }
