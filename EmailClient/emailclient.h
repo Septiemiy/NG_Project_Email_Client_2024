@@ -48,6 +48,7 @@ private slots:
     void onCreateContactClick();
     void addToContacts();
     void listWidgetItemDoubleClicked(QListWidgetItem *item);
+    void clearRecent();
 
 private:
     void setupLoginDialog();
@@ -61,6 +62,7 @@ private:
     void loadRecentFromFile();
     void loadContactsFromFile();
     void loadJsonIntoListWidget(QByteArray &recentFileData, int fileType);
+    void setDeleteRecentButtonIcon();
 
 signals:
     void listWidgetChanged(int recentFile);

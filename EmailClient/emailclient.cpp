@@ -22,6 +22,7 @@ EmailClient::EmailClient(QWidget *parent)
     setsBlurToMainWindow();
     connectToSmtp();
     setupLoginDialog();
+    setDeleteRecentButtonIcon();
 
     connect(m_loginWidget->ui->b_login, &QPushButton::clicked, this, &EmailClient::checkUserLoginData);
     connect(ui->b_sendEmail, &QPushButton::clicked, this, &EmailClient::onSendEmailClick);
@@ -30,6 +31,7 @@ EmailClient::EmailClient(QWidget *parent)
     connect(ui->b_createNewConctact, &QPushButton::clicked, this, &EmailClient::onCreateContactClick);
     connect(m_createContact->ui->b_contact_create, &QPushButton::clicked, this, &EmailClient::addToContacts);
     connect(ui->lw_recent, &QListWidget::itemDoubleClicked, this, &EmailClient::listWidgetItemDoubleClicked);
+    connect(ui->b_clearRecent, &QPushButton::clicked, this, &EmailClient::clearRecent);
 
 }
 
@@ -258,6 +260,13 @@ void EmailClient::listWidgetItemDoubleClicked(QListWidgetItem *item)
     m_createContact->show();
 }
 
+void EmailClient::clearRecent()
+{
+    QFile recentFile(m_user.email.split("@").first() + " recent.json");
+    recentFile.resize(0);
+    ui->lw_recent->clear();
+}
+
 void EmailClient::writeJsonIntoFile(QFile &file, int fileType)
 {
     if(fileType == FileType::RecentFile)
@@ -349,4 +358,11 @@ void EmailClient::loadJsonIntoListWidget(QByteArray &recentFileData, int fileTyp
         }
     }
 
+}
+
+void EmailClient::setDeleteRecentButtonIcon()
+{
+    QPixmap pixmap(":/Icons/trash.png");
+    QIcon icon(pixmap);
+    ui->b_clearRecent->setIcon(icon);
 }
