@@ -12,6 +12,9 @@
 #include <QDebug>
 #include <QTimer>
 #include <QDateTime>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -36,6 +39,9 @@ public:
 
 private slots:
     void checkUserLoginData();
+    void onSendEmailClick();
+    void sendEmailToUser();
+    void saveRecentIntoFile();
 
 private:
     void setupLoginDialog();
@@ -43,10 +49,14 @@ private:
     void connectToSmtp();
     void switchToEmailClientWindow();
     void createUserStruct();
-    void onSendEmailClick();
-    void sendEmailToUser();
     QStringList stringToRecipient(QString user);
     void addToRecent(QStringList &users);
+    void writeJsonIntoRecentFile(QFile &recentFile);
+    void loadRecentFromFile();
+    void loadJsonIntoListWidget(QByteArray &recentFileData);
+
+signals:
+    void listWidgetChanged();
 
 private:
     Ui::EmailClient *ui;
@@ -56,6 +66,7 @@ private:
     SmtpClient *m_smtp;
     SendToUser *m_sendToUser;
     User m_user;
+    QString m_recentPath;
 
     enum UserData
     {

@@ -13,6 +13,8 @@ EmailClient::EmailClient(QWidget *parent)
     m_loginWidget = new Login(this);
     m_sendToUser = new SendToUser();
 
+    m_recentPath = QString("C:/Program Files (x86)/EmailClient/Recent/");
+
     ui->tw_contacts->setTabText(Contacts::Recent, "Recent");
     ui->tw_contacts->setTabText(Contacts::Contact, "Contacts");
 
@@ -25,6 +27,7 @@ EmailClient::EmailClient(QWidget *parent)
     connect(m_loginWidget->ui->b_login, &QPushButton::clicked, this, &EmailClient::checkUserLoginData);
     connect(ui->b_sendEmail, &QPushButton::clicked, this, &EmailClient::onSendEmailClick);
     connect(m_sendToUser->ui->b_send_user_send_email, &QPushButton::clicked, this, &EmailClient::sendEmailToUser);
+    connect(this, &EmailClient::listWidgetChanged, this, &EmailClient::saveRecentIntoFile);
 }
 
 EmailClient::~EmailClient()
@@ -54,6 +57,7 @@ void EmailClient::checkUserLoginData()
         m_loginWidget->ui->e_login_message->setStyleSheet("color: green; background: transparent; border: 0px;");
         createUserStruct();
         QTimer::singleShot(1500, this, &EmailClient::switchToEmailClientWindow);
+        loadRecentFromFile();
     }
 }
 
@@ -143,19 +147,21 @@ void EmailClient::sendEmailToUser()
         message.addPart(attachment, true);
     }
 
-    m_smtp->sendMail(message);
-    if(!m_smtp->waitForMailSent(3000))
-    {
-        qDebug() << "Send email failed";
-        m_sendToUser->ui->e_send_user_message->setText("Send email failed");
-    }
-    else
-    {
-        qDebug() << "Email send";
-        m_sendToUser->ui->e_send_user_message->setText("Send email success");
-        m_sendToUser->ui->e_send_user_message->setStyleSheet("color: green; background: transparent; border: 0px;");
-        addToRecent(users);
-    }
+    addToRecent(users);
+
+    // m_smtp->sendMail(message);
+    // if(!m_smtp->waitForMailSent(3000))
+    // {
+    //     qDebug() << "Send email failed";
+    //     m_sendToUser->ui->e_send_user_message->setText("Send email failed");
+    // }
+    // else
+    // {
+    //     qDebug() << "Email send";
+    //     m_sendToUser->ui->e_send_user_message->setText("Send email success");
+    //     m_sendToUser->ui->e_send_user_message->setStyleSheet("color: green; background: transparent; border: 0px;");
+
+    // }
 }
 
 QStringList EmailClient::stringToRecipient(QString user)
@@ -168,6 +174,70 @@ void EmailClient::addToRecent(QStringList &users)
     for(int index = 0; index < users.size(); index++)
     {
         QStringList userData = stringToRecipient(users.at(index));
-        ui->lw_recent->addItem(userData.at(UserData::Email) + "\n" + QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy"));
+        ui->lw_recent->insertItem(0, userData.at(UserData::Email) + " / " + userData.at(UserData::Name) + "\n" + QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy"));
+    }
+
+    emit listWidgetChanged();
+}
+
+void EmailClient::saveRecentIntoFile()
+{
+    // QDir recentDir;
+    // if(!recentDir.exists(m_recentPath))
+    // {
+    //     recentDir.mkpath(m_recentPath);
+    // }
+
+    QFile recentFile(m_user.email.split("@").first() + " recent.json");
+    if(recentFile.open(QIODevice::WriteOnly))
+    {
+        writeJsonIntoRecentFile(recentFile);
+    }
+    else
+    {
+        qDebug() << "Can`t open file: " << recentFile.fileName();
+    }
+}
+
+void EmailClient::writeJsonIntoRecentFile(QFile &recentFile)
+{
+    QStringList recentStrings;
+    for(int index = 0; index < ui->lw_recent->count(); index++)
+    {
+        QString recentItemText = ui->lw_recent->item(index)->text();
+        recentStrings << recentItemText;
+    }
+
+    QJsonArray recentArray = QJsonArray::fromStringList(recentStrings);
+
+    QJsonObject recentJson;
+    recentJson["Recent"] = recentArray;
+
+    QJsonDocument recentJsonDocument { recentJson };
+    recentFile.write(recentJsonDocument.toJson());
+    recentFile.close();
+}
+
+void EmailClient::loadRecentFromFile()
+{
+    QFile recentFile(m_user.email.split("@").first() + " recent.json");
+    if(recentFile.exists())
+    {
+        if(recentFile.open(QIODevice::ReadOnly))
+        {
+            QByteArray recentFileData = recentFile.readAll();
+            loadJsonIntoListWidget(recentFileData);
+        }
+    }
+}
+
+void EmailClient::loadJsonIntoListWidget(QByteArray &recentFileData)
+{
+    QJsonDocument recentJsonDocument = QJsonDocument::fromJson(recentFileData);
+    QJsonArray recentJsonArray = recentJsonDocument.object().value("Recent").toArray();
+
+    for(int index = 0; index < recentJsonArray.size(); index++)
+    {
+        ui->lw_recent->addItem(recentJsonArray.at(index).toString());
     }
 }
