@@ -23,6 +23,7 @@ EmailClient::EmailClient(QWidget *parent)
     connectToSmtp();
     setupLoginDialog();
     setDeleteRecentButtonIcon();
+    setLogoutButtonIcon();
 
     connect(m_loginWidget->ui->b_login, &QPushButton::clicked, this, &EmailClient::checkUserLoginData);
     connect(ui->b_sendEmail, &QPushButton::clicked, this, &EmailClient::onSendEmailClick);
@@ -33,7 +34,7 @@ EmailClient::EmailClient(QWidget *parent)
     connect(ui->lw_recent, &QListWidget::itemDoubleClicked, this, &EmailClient::recentWidgetItemDoubleClicked);
     connect(ui->lw_contacts, &QListWidget::itemDoubleClicked, this, &EmailClient::contactsWidgetItemDoubleClicked);
     connect(ui->b_clearRecent, &QPushButton::clicked, this, &EmailClient::clearRecent);
-
+    connect(ui->b_logout, &QPushButton::clicked, this, &EmailClient::onLogoutClick);
 }
 
 EmailClient::~EmailClient()
@@ -58,7 +59,7 @@ void EmailClient::checkUserLoginData()
     }
     else
     {
-        qDebug() << "User connected";
+        qDebug() << "User " << m_loginWidget->ui->e_login_email->text() << " connected";
         m_loginWidget->ui->e_login_message->setText("Successful connection");
         m_loginWidget->ui->e_login_message->setStyleSheet("color: green; background: transparent; border: 0px;");
         createUserStruct();
@@ -276,6 +277,15 @@ void EmailClient::clearRecent()
     ui->lw_recent->clear();
 }
 
+void EmailClient::onLogoutClick()
+{
+    m_blurEffect->setEnabled(true);
+    ui->lw_recent->clear();
+    ui->lw_contacts->clear();
+    setupLoginDialog();
+    qDebug() << "User " << m_user.email << " disconnected";
+}
+
 void EmailClient::writeJsonIntoFile(QFile &file, int fileType)
 {
     if(fileType == FileType::RecentFile)
@@ -374,4 +384,11 @@ void EmailClient::setDeleteRecentButtonIcon()
     QPixmap pixmap(":/Icons/trash.png");
     QIcon icon(pixmap);
     ui->b_clearRecent->setIcon(icon);
+}
+
+void EmailClient::setLogoutButtonIcon()
+{
+    QPixmap pixmap(":/Icons/logout.png");
+    QIcon icon(pixmap);
+    ui->b_logout->setIcon(icon);
 }
