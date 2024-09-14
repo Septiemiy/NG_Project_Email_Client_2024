@@ -30,7 +30,8 @@ EmailClient::EmailClient(QWidget *parent)
     connect(this, &EmailClient::listWidgetChanged, this, &EmailClient::saveIntoFile);
     connect(ui->b_createNewConctact, &QPushButton::clicked, this, &EmailClient::onCreateContactClick);
     connect(m_createContact->ui->b_contact_create, &QPushButton::clicked, this, &EmailClient::addToContacts);
-    connect(ui->lw_recent, &QListWidget::itemDoubleClicked, this, &EmailClient::listWidgetItemDoubleClicked);
+    connect(ui->lw_recent, &QListWidget::itemDoubleClicked, this, &EmailClient::recentWidgetItemDoubleClicked);
+    connect(ui->lw_contacts, &QListWidget::itemDoubleClicked, this, &EmailClient::contactsWidgetItemDoubleClicked);
     connect(ui->b_clearRecent, &QPushButton::clicked, this, &EmailClient::clearRecent);
 
 }
@@ -252,12 +253,20 @@ void EmailClient::addToContacts()
     emit listWidgetChanged(FileType::ContactsFile);
 }
 
-void EmailClient::listWidgetItemDoubleClicked(QListWidgetItem *item)
+void EmailClient::recentWidgetItemDoubleClicked(QListWidgetItem *item)
 {
     QStringList itemTextList = item->text().split("\n").first().split(" / ");
     m_createContact->ui->e_contact_email->setText(itemTextList[UserData::Email]);
     m_createContact->ui->e_contact_name->setText(itemTextList[UserData::Name]);
     m_createContact->show();
+}
+
+void EmailClient::contactsWidgetItemDoubleClicked(QListWidgetItem *item)
+{
+    QStringList itemTextList = item->text().split("\n");
+    m_sendToUser->ui->e_send_user_email->setText(itemTextList.last());
+    m_sendToUser->ui->e_send_user_name->setText(itemTextList.first());
+    m_sendToUser->show();
 }
 
 void EmailClient::clearRecent()

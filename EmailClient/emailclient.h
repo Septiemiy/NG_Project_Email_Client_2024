@@ -47,7 +47,8 @@ private slots:
     void saveIntoFile(int fileType);
     void onCreateContactClick();
     void addToContacts();
-    void listWidgetItemDoubleClicked(QListWidgetItem *item);
+    void recentWidgetItemDoubleClicked(QListWidgetItem *item);
+    void contactsWidgetItemDoubleClicked(QListWidgetItem *item);
     void clearRecent();
 
 private:
