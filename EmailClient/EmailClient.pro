@@ -9,17 +9,20 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    createcontact.cpp \
     login.cpp \
     main.cpp \
     emailclient.cpp \
     sendtouser.cpp
 
 HEADERS += \
+    createcontact.h \
     emailclient.h \
     login.h \
     sendtouser.h
 
 FORMS += \
+    createcontact.ui \
     emailclient.ui \
     login.ui \
     sendtouser.ui

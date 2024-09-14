@@ -12,8 +12,7 @@ EmailClient::EmailClient(QWidget *parent)
     m_blurEffect = new QGraphicsBlurEffect();
     m_loginWidget = new Login(this);
     m_sendToUser = new SendToUser();
-
-    m_recentPath = QString("C:/Program Files (x86)/EmailClient/Recent/");
+    m_createContact = new CreateContact();
 
     ui->tw_contacts->setTabText(Contacts::Recent, "Recent");
     ui->tw_contacts->setTabText(Contacts::Contact, "Contacts");
@@ -27,7 +26,11 @@ EmailClient::EmailClient(QWidget *parent)
     connect(m_loginWidget->ui->b_login, &QPushButton::clicked, this, &EmailClient::checkUserLoginData);
     connect(ui->b_sendEmail, &QPushButton::clicked, this, &EmailClient::onSendEmailClick);
     connect(m_sendToUser->ui->b_send_user_send_email, &QPushButton::clicked, this, &EmailClient::sendEmailToUser);
-    connect(this, &EmailClient::listWidgetChanged, this, &EmailClient::saveRecentIntoFile);
+    connect(this, &EmailClient::listWidgetChanged, this, &EmailClient::saveIntoFile);
+    connect(ui->b_createNewConctact, &QPushButton::clicked, this, &EmailClient::onCreateContactClick);
+    connect(m_createContact->ui->b_contact_create, &QPushButton::clicked, this, &EmailClient::addToContacts);
+    connect(ui->lw_recent, &QListWidget::itemDoubleClicked, this, &EmailClient::listWidgetItemDoubleClicked);
+
 }
 
 EmailClient::~EmailClient()
@@ -58,6 +61,7 @@ void EmailClient::checkUserLoginData()
         createUserStruct();
         QTimer::singleShot(1500, this, &EmailClient::switchToEmailClientWindow);
         loadRecentFromFile();
+        loadContactsFromFile();
     }
 }
 
@@ -177,10 +181,10 @@ void EmailClient::addToRecent(QStringList &users)
         ui->lw_recent->insertItem(0, userData.at(UserData::Email) + " / " + userData.at(UserData::Name) + "\n" + QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy"));
     }
 
-    emit listWidgetChanged();
+    emit listWidgetChanged(FileType::RecentFile);
 }
 
-void EmailClient::saveRecentIntoFile()
+void EmailClient::saveIntoFile(int fileType)
 {
     // QDir recentDir;
     // if(!recentDir.exists(m_recentPath))
@@ -188,34 +192,110 @@ void EmailClient::saveRecentIntoFile()
     //     recentDir.mkpath(m_recentPath);
     // }
 
-    QFile recentFile(m_user.email.split("@").first() + " recent.json");
-    if(recentFile.open(QIODevice::WriteOnly))
+
+    if(fileType == FileType::RecentFile)
     {
-        writeJsonIntoRecentFile(recentFile);
+        QFile recentFile(m_user.email.split("@").first() + " recent.json");
+        if(recentFile.open(QIODevice::WriteOnly))
+        {
+            writeJsonIntoFile(recentFile, fileType);
+        }
+        else
+        {
+            qDebug() << "Can`t open file: " << recentFile.fileName();
+        }
     }
-    else
+    else if(fileType == FileType::ContactsFile)
     {
-        qDebug() << "Can`t open file: " << recentFile.fileName();
+        QFile contactsFile(m_user.email.split("@").first() + " contacts.json");
+        if(contactsFile.open(QIODevice::WriteOnly))
+        {
+            writeJsonIntoFile(contactsFile, fileType);
+        }
+        else
+        {
+            qDebug() << "Can`t open file: " << contactsFile.fileName();
+        }
     }
 }
 
-void EmailClient::writeJsonIntoRecentFile(QFile &recentFile)
+void EmailClient::onCreateContactClick()
 {
-    QStringList recentStrings;
-    for(int index = 0; index < ui->lw_recent->count(); index++)
+    m_createContact->show();
+}
+
+void EmailClient::addToContacts()
+{
+    m_createContact->ui->e_contact_message->setStyleSheet("color: red; background: transparent; border: 0px;");
+    if(m_createContact->ui->e_contact_email->text().simplified().size() == 0 || m_createContact->ui->e_contact_name->text().simplified().size() == 0)
     {
-        QString recentItemText = ui->lw_recent->item(index)->text();
-        recentStrings << recentItemText;
+        m_createContact->ui->e_contact_message->setText("Name and email can`t be empty");
+        return;
     }
 
-    QJsonArray recentArray = QJsonArray::fromStringList(recentStrings);
+    for(int index = 0; index < ui->lw_contacts->count(); index++)
+    {
+        QString contactsItemText = ui->lw_contacts->item(index)->text();
+        if(contactsItemText.contains(m_createContact->ui->e_contact_email->text()))
+        {
+            m_createContact->ui->e_contact_message->setText("This user already exists");
+            return;
+        }
+    }
 
-    QJsonObject recentJson;
-    recentJson["Recent"] = recentArray;
+    ui->lw_contacts->addItem(m_createContact->ui->e_contact_name->text() + "\n" + m_createContact->ui->e_contact_email->text());
+    m_createContact->ui->e_contact_message->setText("Contact created");
+    m_createContact->ui->e_contact_message->setStyleSheet("color: green; background: transparent; border: 0px;");
 
-    QJsonDocument recentJsonDocument { recentJson };
-    recentFile.write(recentJsonDocument.toJson());
-    recentFile.close();
+    emit listWidgetChanged(FileType::ContactsFile);
+}
+
+void EmailClient::listWidgetItemDoubleClicked(QListWidgetItem *item)
+{
+    QStringList itemTextList = item->text().split("\n").first().split(" / ");
+    m_createContact->ui->e_contact_email->setText(itemTextList[UserData::Email]);
+    m_createContact->ui->e_contact_name->setText(itemTextList[UserData::Name]);
+    m_createContact->show();
+}
+
+void EmailClient::writeJsonIntoFile(QFile &file, int fileType)
+{
+    if(fileType == FileType::RecentFile)
+    {
+        QStringList recentStrings;
+        for(int index = 0; index < ui->lw_recent->count(); index++)
+        {
+            QString recentItemText = ui->lw_recent->item(index)->text();
+            recentStrings << recentItemText;
+        }
+
+        QJsonArray recentArray = QJsonArray::fromStringList(recentStrings);
+
+        QJsonObject recentJson;
+        recentJson["Recent"] = recentArray;
+
+        QJsonDocument recentJsonDocument { recentJson };
+        file.write(recentJsonDocument.toJson());
+        file.close();
+    }
+    else if(fileType == FileType::ContactsFile)
+    {
+        QStringList contactsStrings;
+        for(int index = 0; index < ui->lw_contacts->count(); index++)
+        {
+            QString contactsItemText = ui->lw_contacts->item(index)->text();
+            contactsStrings << contactsItemText;
+        }
+
+        QJsonArray contactsArray = QJsonArray::fromStringList(contactsStrings);
+
+        QJsonObject contactsJson;
+        contactsJson["Contacts"] = contactsArray;
+
+        QJsonDocument contactsJsonDocument { contactsJson };
+        file.write(contactsJsonDocument.toJson());
+        file.close();
+    }
 }
 
 void EmailClient::loadRecentFromFile()
@@ -226,18 +306,47 @@ void EmailClient::loadRecentFromFile()
         if(recentFile.open(QIODevice::ReadOnly))
         {
             QByteArray recentFileData = recentFile.readAll();
-            loadJsonIntoListWidget(recentFileData);
+            loadJsonIntoListWidget(recentFileData, FileType::RecentFile);
         }
     }
+    recentFile.close();
 }
 
-void EmailClient::loadJsonIntoListWidget(QByteArray &recentFileData)
+void EmailClient::loadContactsFromFile()
 {
-    QJsonDocument recentJsonDocument = QJsonDocument::fromJson(recentFileData);
-    QJsonArray recentJsonArray = recentJsonDocument.object().value("Recent").toArray();
-
-    for(int index = 0; index < recentJsonArray.size(); index++)
+    QFile contactsFile(m_user.email.split("@").first() + " contacts.json");
+    if(contactsFile.exists())
     {
-        ui->lw_recent->addItem(recentJsonArray.at(index).toString());
+        if(contactsFile.open(QIODevice::ReadOnly))
+        {
+            QByteArray contactsFileData = contactsFile.readAll();
+            loadJsonIntoListWidget(contactsFileData, FileType::ContactsFile);
+        }
     }
+    contactsFile.close();
+}
+
+void EmailClient::loadJsonIntoListWidget(QByteArray &recentFileData, int fileType)
+{
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(recentFileData);
+
+    if(fileType == FileType::RecentFile)
+    {
+        QJsonArray recentJsonArray = jsonDocument.object().value("Recent").toArray();
+
+        for(int index = 0; index < recentJsonArray.size(); index++)
+        {
+            ui->lw_recent->addItem(recentJsonArray.at(index).toString());
+        }
+    }
+    else if(fileType == FileType::ContactsFile)
+    {
+        QJsonArray contactsJsonArray = jsonDocument.object().value("Contacts").toArray();
+
+        for(int index = 0; index < contactsJsonArray.size(); index++)
+        {
+            ui->lw_contacts->addItem(contactsJsonArray.at(index).toString());
+        }
+    }
+
 }

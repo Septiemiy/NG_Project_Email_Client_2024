@@ -5,6 +5,8 @@
 #include "ui_login.h"
 #include "sendtouser.h"
 #include "ui_sendtouser.h"
+#include "createcontact.h"
+#include "ui_createcontact.h"
 #include "../src/SmtpMime"
 
 #include <QMainWindow>
@@ -15,6 +17,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QListWidgetItem>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -41,7 +44,10 @@ private slots:
     void checkUserLoginData();
     void onSendEmailClick();
     void sendEmailToUser();
-    void saveRecentIntoFile();
+    void saveIntoFile(int fileType);
+    void onCreateContactClick();
+    void addToContacts();
+    void listWidgetItemDoubleClicked(QListWidgetItem *item);
 
 private:
     void setupLoginDialog();
@@ -51,12 +57,13 @@ private:
     void createUserStruct();
     QStringList stringToRecipient(QString user);
     void addToRecent(QStringList &users);
-    void writeJsonIntoRecentFile(QFile &recentFile);
+    void writeJsonIntoFile(QFile &file, int fileType);
     void loadRecentFromFile();
-    void loadJsonIntoListWidget(QByteArray &recentFileData);
+    void loadContactsFromFile();
+    void loadJsonIntoListWidget(QByteArray &recentFileData, int fileType);
 
 signals:
-    void listWidgetChanged();
+    void listWidgetChanged(int recentFile);
 
 private:
     Ui::EmailClient *ui;
@@ -66,7 +73,7 @@ private:
     SmtpClient *m_smtp;
     SendToUser *m_sendToUser;
     User m_user;
-    QString m_recentPath;
+    CreateContact *m_createContact;
 
     enum UserData
     {
@@ -78,6 +85,12 @@ private:
     {
         Recent,
         Contact
+    };
+
+    enum FileType
+    {
+        RecentFile,
+        ContactsFile
     };
 };
 #endif // EMAILCLIENT_H
