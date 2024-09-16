@@ -122,7 +122,7 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QListWidget" name="listWidget">
+   <widget class="QListWidget" name="lw_emails">
     <property name="geometry">
      <rect>
       <x>270</x>
@@ -143,6 +143,19 @@
     </property>
     <property name="text">
      <string>Send email</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="b_refresh">
+    <property name="geometry">
+     <rect>
+      <x>733</x>
+      <y>450</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Refresh</string>
     </property>
    </widget>
   </widget>

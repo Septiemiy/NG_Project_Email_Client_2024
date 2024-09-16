@@ -21,6 +21,7 @@ EmailClient::EmailClient(QWidget *parent)
 
     setsBlurToMainWindow();
     connectToSmtp();
+    connectToImap();
     setupLoginDialog();
     setDeleteRecentButtonIcon();
     setLogoutButtonIcon();
@@ -35,11 +36,17 @@ EmailClient::EmailClient(QWidget *parent)
     connect(ui->lw_contacts, &QListWidget::itemDoubleClicked, this, &EmailClient::contactsWidgetItemDoubleClicked);
     connect(ui->b_clearRecent, &QPushButton::clicked, this, &EmailClient::clearRecent);
     connect(ui->b_logout, &QPushButton::clicked, this, &EmailClient::onLogoutClick);
+    connect(m_imap, &QSslSocket::readyRead, this, &EmailClient::readImap);
+    connect(this, &EmailClient::userLoginIntoImap, this, &EmailClient::selectInbox);
+    connect(this, &EmailClient::inboxSelected, this, &EmailClient::fetchingEmails);
+    connect(this, &EmailClient::emailsGot, this, &EmailClient::outputEmails);
+    connect(ui->b_refresh, &QPushButton::clicked, this, &EmailClient::refreshEmails);
 }
 
 EmailClient::~EmailClient()
 {
     m_smtp->quit();
+    m_imap->close();
     delete ui;
 }
 
@@ -63,6 +70,8 @@ void EmailClient::checkUserLoginData()
         m_loginWidget->ui->e_login_message->setText("Successful connection");
         m_loginWidget->ui->e_login_message->setStyleSheet("color: green; background: transparent; border: 0px;");
         createUserStruct();
+        loginUserImap();
+        emit userLoginIntoImap();
         QTimer::singleShot(1500, this, &EmailClient::switchToEmailClientWindow);
         loadRecentFromFile();
         loadContactsFromFile();
@@ -157,19 +166,19 @@ void EmailClient::sendEmailToUser()
 
     addToRecent(users);
 
-    // m_smtp->sendMail(message);
-    // if(!m_smtp->waitForMailSent(3000))
-    // {
-    //     qDebug() << "Send email failed";
-    //     m_sendToUser->ui->e_send_user_message->setText("Send email failed");
-    // }
-    // else
-    // {
-    //     qDebug() << "Email send";
-    //     m_sendToUser->ui->e_send_user_message->setText("Send email success");
-    //     m_sendToUser->ui->e_send_user_message->setStyleSheet("color: green; background: transparent; border: 0px;");
+    m_smtp->sendMail(message);
+    if(!m_smtp->waitForMailSent(3000))
+    {
+        qDebug() << "Send email failed";
+        m_sendToUser->ui->e_send_user_message->setText("Send email failed");
+    }
+    else
+    {
+        qDebug() << "Email send";
+        m_sendToUser->ui->e_send_user_message->setText("Send email success");
+        m_sendToUser->ui->e_send_user_message->setStyleSheet("color: green; background: transparent; border: 0px;");
 
-    // }
+    }
 }
 
 QStringList EmailClient::stringToRecipient(QString user)
@@ -190,13 +199,6 @@ void EmailClient::addToRecent(QStringList &users)
 
 void EmailClient::saveIntoFile(int fileType)
 {
-    // QDir recentDir;
-    // if(!recentDir.exists(m_recentPath))
-    // {
-    //     recentDir.mkpath(m_recentPath);
-    // }
-
-
     if(fileType == FileType::RecentFile)
     {
         QFile recentFile(m_user.email.split("@").first() + " recent.json");
@@ -282,6 +284,8 @@ void EmailClient::onLogoutClick()
     m_blurEffect->setEnabled(true);
     ui->lw_recent->clear();
     ui->lw_contacts->clear();
+    ui->lw_emails->clear();
+    m_emails.clear();
     setupLoginDialog();
     qDebug() << "User " << m_user.email << " disconnected";
 }
@@ -391,4 +395,119 @@ void EmailClient::setLogoutButtonIcon()
     QPixmap pixmap(":/Icons/logout.png");
     QIcon icon(pixmap);
     ui->b_logout->setIcon(icon);
+}
+
+void EmailClient::connectToImap()
+{
+    m_imap = new QSslSocket(this);
+    m_imap->connectToHostEncrypted("imap.gmail.com", 993);
+    if(!m_imap->waitForConnected(5000))
+    {
+        qDebug() << "Failed to connect to imap server";
+        m_loginWidget->ui->e_login_message->setText("Failed to connect to imap server");
+    }
+    else
+    {
+        qDebug() << "Connect to imap server";
+    }
+}
+
+void EmailClient::loginUserImap()
+{
+    sendCommandToImap("A0 LOGIN \"" + m_user.email + "\" \"" + m_user.appPassword + "\"");
+}
+
+void EmailClient::sendCommandToImap(const QString &command)
+{
+    m_imap->write((command + "\r\n").toUtf8());
+    m_imap->flush();
+}
+
+void EmailClient::getEmailDateTime(QString dateTime)
+{
+    QString format = "dd MMM yyyy HH:mm:ss";
+    dateTime = dateTime.remove(0, dateTime.indexOf(',') + 2);
+    dateTime = dateTime.remove(dateTime.indexOf("+"), dateTime.length());
+    dateTime = dateTime.remove(dateTime.indexOf(" -"), dateTime.length());
+    m_email.dateTime = QDateTime::fromString(dateTime, format);
+}
+
+void EmailClient::getEmailFrom(QString fromString)
+{
+    m_email.fromEmail = fromString.remove("From: ");
+}
+
+void EmailClient::getEmailSubject(QString subjectString)
+{
+    m_email.subject = subjectString.remove("Subject: ");
+    m_emails.append(m_email);
+
+    if(m_emails.size() == m_existsEmailNumber)
+    {
+        emit emailsGot();
+    }
+}
+
+void EmailClient::readImap()
+{
+    while(m_imap->canReadLine())
+    {
+        QByteArray response = m_imap->readLine().trimmed().data();
+        if(response.contains("A0 OK"))
+        {
+            qDebug() << "IMAP: " << response;
+            emit userLoginIntoImap();
+        }
+        else if(response.contains("EXISTS"))
+        {
+            qDebug() << "IMAP: " << response;
+            QByteArrayList existsEmailLine = response.split(' ');
+            m_existsEmailNumber = existsEmailLine.at(1).toInt();
+        }
+        else if(response.contains("A1 OK"))
+        {
+            qDebug() << "IMAP: " << response;
+            emit inboxSelected();
+        }
+        else if(response.contains("Date: "))
+        {
+            getEmailDateTime(QString(response));
+        }
+        else if(response.contains("From: "))
+        {
+            getEmailFrom(QString(response));
+        }
+        else if(response.contains("Subject: "))
+        {
+            getEmailSubject(QString(response));
+        }
+    }
+}
+
+void EmailClient::selectInbox()
+{
+    sendCommandToImap("A1 SELECT INBOX");
+}
+
+void EmailClient::fetchingEmails()
+{
+    for(int index = m_existsEmailNumber; index >= 0; index--)
+    {
+        sendCommandToImap("A2 FETCH " + QString::number(index) + " BODY[]");
+    }
+}
+
+void EmailClient::outputEmails()
+{
+    for(int index = 0; index < m_emails.size(); index++)
+    {
+        ui->lw_emails->addItem("Subject: " + m_emails.at(index).subject + "\n" + "From: " + m_emails.at(index).fromEmail + "\n" + "Time: " + m_emails.at(index).dateTime.toString());
+    }
+}
+
+void EmailClient::refreshEmails()
+{
+    ui->lw_emails->clear();
+    m_emails.clear();
+    emit userLoginIntoImap();
 }

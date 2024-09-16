@@ -18,6 +18,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QListWidgetItem>
+#include <QSslSocket>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,6 +31,13 @@ struct User
     QString name;
     QString email;
     QString appPassword;
+};
+
+struct Email
+{
+    QDateTime dateTime;
+    QString fromEmail;
+    QString subject;
 };
 
 class EmailClient : public QMainWindow
@@ -51,6 +59,11 @@ private slots:
     void contactsWidgetItemDoubleClicked(QListWidgetItem *item);
     void clearRecent();
     void onLogoutClick();
+    void readImap();
+    void selectInbox();
+    void fetchingEmails();
+    void outputEmails();
+    void refreshEmails();
 
 private:
     void setupLoginDialog();
@@ -66,9 +79,18 @@ private:
     void loadJsonIntoListWidget(QByteArray &recentFileData, int fileType);
     void setDeleteRecentButtonIcon();
     void setLogoutButtonIcon();
+    void connectToImap();
+    void loginUserImap();
+    void sendCommandToImap(const QString &command);
+    void getEmailDateTime(QString dateTime);
+    void getEmailFrom(QString fromString);
+    void getEmailSubject(QString subjectString);
 
 signals:
-    void listWidgetChanged(int recentFile);
+    int listWidgetChanged(int recentFile);
+    void userLoginIntoImap();
+    void inboxSelected();
+    void emailsGot();
 
 private:
     Ui::EmailClient *ui;
@@ -79,6 +101,10 @@ private:
     SendToUser *m_sendToUser;
     User m_user;
     CreateContact *m_createContact;
+    QSslSocket *m_imap;
+    int m_existsEmailNumber;
+    Email m_email;
+    QList<Email> m_emails;
 
     enum UserData
     {
